@@ -26,6 +26,7 @@ dockerize, containerize
 -   create projects, add members
 -   Each project can have many tasks
 -   Tasks can be assigned to members
+-   reminders
 
 -   todo, in progress, done for tasks
 -   add tags to tasks,
