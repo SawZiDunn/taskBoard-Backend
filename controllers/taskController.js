@@ -1,8 +1,116 @@
+const ApiError = require("../utils/apiError");
+const Task = require("../models/taskModel");
+
 module.exports = {
-    createStandaloneTask: (req, res, next) => {},
-    createTaskUnderProject: (req, res, next) => {},
-    getAllUserTasks: (req, res, next) => {},
-    getProjectTasks: (req, res, next) => {},
-    delateTask: (req, res, next) => {},
-    updateTask: (req, res, next) => {},
+    createStandaloneTask: async (req, res, next) => {
+        try {
+            const { title, description, status, priority, tags, dueDate } =
+                req.body;
+
+            if (
+                (!title || !description || !status || !priority || !tags.length,
+                !dueDate)
+            ) {
+                return next(new ApiError(404, "All fields are required!"));
+            }
+
+            const newTask = new Task({
+                title,
+                description,
+                status,
+                priority,
+                tags,
+                dueDate,
+                createdBy: req.user.id,
+            });
+
+            await newTask.save();
+            res.status(201).json({
+                success: true,
+                message: "A new task is successfully created",
+                task: newTask,
+            });
+        } catch (e) {
+            console.log("Err at creating new task!", e);
+            next(e);
+        }
+    },
+
+    getAllUserTasks: async (req, res, next) => {
+        try {
+            let user = req.user;
+            const tasks = await Task.find({ createdBy: user.id });
+
+            res.status(200).json({
+                success: true,
+
+                tasks,
+                length: tasks.length,
+            });
+        } catch (e) {
+            console.log("Err getting tasks!", e);
+            next(e);
+        }
+    },
+
+    deleteTask: async (req, res, next) => {
+        try {
+            let { id: taskId } = req.params;
+            console.log(taskId);
+            const deletedTask = await Task.findByIdAndDelete(taskId);
+
+            res.status(200).json({
+                success: true,
+                message: "Successfully deleted",
+
+                deletedTask,
+            });
+        } catch (e) {
+            console.log("Err deleting task!", e);
+            next(e);
+        }
+    },
+    updateTask: async (req, res, next) => {
+        try {
+            const { title, description, status, priority, tags, dueDate } =
+                req.body;
+
+            const { id: taskId } = req.params;
+
+            const updates = {};
+            if (title !== undefined) updates.title = title;
+            if (description !== undefined) updates.description = description;
+            if (status !== undefined) updates.status = status;
+            if (priority !== undefined) updates.priority = priority;
+            if (tags !== undefined) updates.tags = tags;
+            if (dueDate !== undefined) updates.dueDate = dueDate;
+
+            const task = await Task.findById(taskId);
+            if (!task) {
+                return next(new ApiError(404, "Task does not exist."));
+            }
+
+            // ObjectId to String
+            if (task.createdBy.toString() != req.user.id) {
+                return next(new ApiError(404, "User not authorized!"));
+            }
+
+            const updatedTask = await Task.findOneAndUpdate(
+                { _id: taskId },
+                {
+                    $set: updates, // use set to partially update, put replace entire doc
+                },
+                { new: true, runValidators: true }
+            );
+
+            res.status(201).json({
+                success: true,
+                message: "task updated",
+                updatedTask,
+            });
+        } catch (e) {
+            console.log("Err updating task!", e);
+            next(e);
+        }
+    },
 };

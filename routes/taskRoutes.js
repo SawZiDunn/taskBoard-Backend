@@ -7,12 +7,9 @@ router
     .get(taskController.getAllUserTasks)
     .post(taskController.createStandaloneTask);
 
-router.post("/projects/:id/tasks", taskController.createTaskUnderProject);
-router.get("/projects/:id/tasks", taskController.getProjectTasks);
-
 router
     .route("/:id")
     .put(taskController.updateTask)
-    .delete(taskController.delateTask);
+    .delete(taskController.deleteTask);
 
 module.exports = router;

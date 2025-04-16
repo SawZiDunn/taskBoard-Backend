@@ -1,8 +1,10 @@
-const projectController = require("../controllers/taskController");
+const projectController = require("../controllers/projectController");
 const express = require("express");
 const router = express.Router();
 
-router.post("/projects/:id/tasks", taskController.createTaskUnderProject);
-router.get("/projects/:id/tasks", taskController.getProjectTasks);
+router
+    .route("/projects/:id/tasks")
+    .get(projectController.getProjectTasks)
+    .post(projectController.createTaskUnderProject);
 
 module.exports = router;

@@ -21,7 +21,15 @@ const TaskSchema = new mongoose.Schema(
             default: "medium",
         },
 
-        tags: [String],
+        tags: {
+            type: [String],
+            validate: {
+                validator: (input) => input.length <= 3,
+                // msg will be shown if validator returns false
+                message: (props) =>
+                    `Maximum 3 tags allowed, but got ${props.value.length} tags.`,
+            },
+        },
 
         dueDate: Date,
         completedAt: Date,
@@ -37,6 +45,11 @@ const TaskSchema = new mongoose.Schema(
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "User",
+                validate: {
+                    validator: (members) => members.length <= 3,
+                    message: (props) =>
+                        `Maximum 3 members to assign, but ${props.value.length} provided!`,
+                },
             },
         ],
 

@@ -73,7 +73,7 @@ authController = {
                     email: existedUser.email,
                 },
                 process.env.JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+                { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
             );
             return res.status(200).json({
                 success: true,
@@ -92,7 +92,10 @@ authController = {
     },
 
     refresh: (req, res, next) => {},
-    logout: (req, res, next) => {},
+    logout: (req, res, next) => {
+        delete req.user;
+        next();
+    },
 };
 
 module.exports = authController;

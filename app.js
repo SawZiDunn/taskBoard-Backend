@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const errorHandler = require("./middlewares/errorHandler");
+const auth = require("./middlewares/auth");
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const projectRoutes = require("./routes/projectRoutes");
@@ -11,8 +12,10 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/tasks", taskRoutes);
-app.use("/api/projects", projectRoutes);
+
+// proteted routes
+app.use("/api/tasks", auth, taskRoutes);
+app.use("/api/projects", auth, projectRoutes);
 
 app.use(errorHandler);
 
