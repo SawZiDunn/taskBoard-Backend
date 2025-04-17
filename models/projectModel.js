@@ -41,4 +41,21 @@ const ProjectSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
+/* for schmea level validations
+
+- presave middleware
+ProjectSchema.pre("save", callback(next) {} )
+
+- custom validation
+name {
+    type: String,
+    validate: {
+        validator: function(name),
+        message: props => "works when validator function returns false", props.value = name
+        
+    
+        }
+}
+*/
+
 module.exports = mongoose.model("Project", ProjectSchema);
