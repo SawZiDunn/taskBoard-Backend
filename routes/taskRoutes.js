@@ -12,4 +12,9 @@ router
     .put(taskController.updateTask)
     .delete(taskController.deleteTask);
 
+router
+    .route("/:taskId/comments")
+    .get(taskController.getTaskComments)
+    .post(taskController.createCommentUnderTask);
+
 module.exports = router;

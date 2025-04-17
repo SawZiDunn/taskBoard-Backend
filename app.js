@@ -7,6 +7,7 @@ const auth = require("./middlewares/auth");
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const projectRoutes = require("./routes/projectRoutes");
+const commentRoutes = require("./routes/commentRoutes");
 
 const app = express();
 // csrf attack prevent
@@ -15,7 +16,7 @@ const app = express();
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-    standardHeaders: "draft-8", // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+    standardHeaders: "draft-8", // draft-6:
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
     message: {
         success: false,
@@ -23,7 +24,7 @@ const limiter = rateLimit({
     },
 });
 
-// Apply the rate limiting middleware to all requests.
+// Apply rate limiting middleware to all requests.
 app.use(limiter);
 
 app.use(cors());
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 // proteted routes
 app.use("/api/tasks", auth, taskRoutes);
 app.use("/api/projects", auth, projectRoutes);
+app.use(".api/comments", auth, commentRoutes);
 
 app.use(errorHandler);
 

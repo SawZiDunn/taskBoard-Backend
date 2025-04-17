@@ -113,4 +113,44 @@ module.exports = {
             next(e);
         }
     },
+
+    createCommentUnderTask: async (req, res, next) => {
+        try {
+            const { taskId } = req.params;
+            const { content } = req.body;
+
+            const newComment = new Comment({
+                content,
+                task: taskId,
+                user: req.user.id,
+            });
+
+            await newComment.save();
+
+            res.status(201).json({
+                success: true,
+                message: "Comment added",
+                newComment,
+            });
+        } catch (e) {
+            next(e);
+        }
+    },
+    getTaskComments: async (req, res, next) => {
+        try {
+            const { taskId } = req.params;
+            // populate joins Comment & User Model, adding username to comments
+            // user in Comment is replaced by _id + username
+            // if username is not specified, entire user obj will replace user id in comments
+
+            const comments = await Comment.find({ task: taskId }).populate(
+                "user",
+                "username"
+            );
+
+            res.status(200).json({ success: true, comments });
+        } catch (e) {
+            next(e);
+        }
+    },
 };
