@@ -36,7 +36,7 @@ app.use("/api/auth", authRoutes);
 // proteted routes
 app.use("/api/tasks", auth, taskRoutes);
 app.use("/api/projects", auth, projectRoutes);
-app.use(".api/comments", auth, commentRoutes);
+app.use("/api/comments", auth, commentRoutes);
 
 app.use(errorHandler);
 

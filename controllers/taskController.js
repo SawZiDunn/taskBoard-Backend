@@ -1,5 +1,6 @@
 const ApiError = require("../utils/apiError");
 const Task = require("../models/taskModel");
+const Comment = require("../models/commentModel");
 
 module.exports = {
     createStandaloneTask: async (req, res, next) => {
@@ -140,7 +141,7 @@ module.exports = {
         try {
             const { taskId } = req.params;
             // populate joins Comment & User Model, adding username to comments
-            // user in Comment is replaced by _id + username
+            // user in Comment is replaced by _id + username fro User Collection
             // if username is not specified, entire user obj will replace user id in comments
 
             const comments = await Comment.find({ task: taskId }).populate(
@@ -148,7 +149,11 @@ module.exports = {
                 "username"
             );
 
-            res.status(200).json({ success: true, comments });
+            res.status(200).json({
+                success: true,
+                comments,
+                length: comments.length,
+            });
         } catch (e) {
             next(e);
         }

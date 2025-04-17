@@ -21,4 +21,4 @@ router.delete(
     projectController.removeMemberFromProject
 );
 
-router.module.exports = router;
+module.exports = router;
