@@ -6,12 +6,8 @@ const router = express.Router();
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 
-router.post("/refresh", (req, res) => {
-    res.json({ refresh: "refresh" });
-});
+router.get("/refresh", authController.refresh);
 
-router.post("/logout", (req, res) => {
-    res.json({ logout: "logout" });
-});
+router.get("/logout", authController.logout);
 
 module.exports = router;

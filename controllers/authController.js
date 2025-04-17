@@ -32,7 +32,7 @@ authController = {
                 user: { username: newUser.username, email: newUser.email },
             });
         } catch (e) {
-            console.log("Registratin Error:\n", err);
+            console.log("Registratin Error:\n", e);
             next(e);
         }
     },
@@ -66,35 +66,144 @@ authController = {
                 });
             }
 
-            const token = jwt.sign(
+            // generate accessToken
+            const accessToken = jwt.sign(
                 {
                     id: existedUser._id,
                     username: existedUser.username,
                     email: existedUser.email,
                 },
-                process.env.JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
+                process.env.JWT_ACCESS_SECRET,
+                { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m" }
             );
+
+            // generateRefreshToken
+            const refreshToken = jwt.sign(
+                {
+                    id: existedUser._id,
+                    username: existedUser.username,
+                    email: existedUser.email,
+                },
+                process.env.JWT_REFRESH_SECRET,
+                { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d" }
+            );
+
+            // refreshToken in cookie
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: true, // only send over https
+                sameSite: "Strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            });
+
+            // add refreshToken to User Model
+            await User.findByIdAndUpdate(existedUser._id, {
+                $set: {
+                    refreshToken,
+                },
+            });
+
             return res.status(200).json({
                 success: true,
 
                 message: "Login Successful",
-                token,
+                accessToken,
                 user: {
                     username: existedUser.username,
                     email: existedUser.email,
                 },
             });
         } catch (e) {
-            console.error("Login error:", err);
+            console.error("Login error:", e);
             next(e);
         }
     },
 
-    refresh: (req, res, next) => {},
-    logout: (req, res, next) => {
-        delete req.user;
-        next();
+    refresh: async (req, res, next) => {
+        try {
+            const refreshToken = req.cookies.refreshToken;
+            if (!refreshToken) {
+                return next(new ApiError(401, "No Refresh Token!"));
+            }
+
+            const payload = await jwt.verify(
+                refreshToken,
+                process.env.JWT_REFRESH_SECRET
+            );
+
+            const user = await User.findById(payload.id, { refreshToken: 1 }); // only retrieve refreshToken
+
+            if (!payload) {
+                return next(new ApiError(401, "Invalid Refresh Token!"));
+            }
+
+            if (user.refreshToken !== refreshToken) {
+                return next(new ApiError(401, "Token is not stored in DB"));
+            }
+
+            const accessToken = jwt.sign(
+                {
+                    id: payload.id,
+                    username: payload.username,
+                    email: payload.email,
+                },
+                process.env.JWT_ACCESS_SECRET,
+                { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m" }
+            );
+
+            res.status(200).json({
+                success: true,
+
+                message: "Access Token regenerated",
+                accessToken,
+            });
+        } catch (e) {
+            console.log("refresh token err", e);
+            next(e);
+        }
+    },
+    logout: async (req, res, next) => {
+        try {
+            const refreshToken = req.cookies.refreshToken;
+            if (!refreshToken) {
+                return next(new ApiError(400, "No refreshToken found!"));
+            }
+
+            const decoded = await jwt.verify(
+                refreshToken,
+                process.env.JWT_REFRESH_SECRET
+            );
+
+            // delete refreshToken from DB
+            const updatedUser = await User.findByIdAndUpdate(
+                decoded.id,
+                {
+                    $set: {
+                        refreshToken: null,
+                    },
+                },
+                { new: true }
+            );
+
+            if (!updatedUser) {
+                return next(new ApiError(400, "User Not Found"));
+            }
+
+            res.clearCookie("refreshToken", {
+                httpOnly: true,
+                secure: true, // process.env.NODE_ENV === "production"
+                sameSite: "Strict",
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Logout Successful!",
+                updatedUser,
+            });
+        } catch (e) {
+            console.log("err logging out: ", e);
+            next(e);
+        }
     },
 };
 
