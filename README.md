@@ -1,35 +1,78 @@
-# Frontend
+# Project Management Backend API
 
-React, Typescript, Tailwind CSS
+A robust, secure backend server for a Project Management Application built with Node.js, Express, MongoDB, and JWT Authentication.
 
-## Statement Management
+## Features
 
-Zustand
+-   **Authentication**: JWT with access and refresh tokens
+-   **Projects Management**: Create, update, delete, and share projects
+-   **Task Management**: Assign tasks to project members, track status, add comments
+-   **API Security**: Rate limiting and secure token handling
 
-## Routing
+## API Endpoints
 
-react-router-dom,
+## Authentication
 
-## Data Fetching
+-   Register - `POST /auth/register`
 
-TanStack Query, axios
+-   Login - `POST /auth/login`
 
-# Backend
+-   Logout - `GET /auth/logout`
 
-Express, JWT, MongoDB with Mongoose
-role based access control
-refresh token, sessions
-express rate limit
-dockerize, containerize
+-   Refresh Token - `GET /auth/refresh`
 
--   Register, Login
--   create projects, add members
--   Each project can have many tasks
--   Tasks can be assigned to members
--   reminders
+Access tokens are short-lived, and refresh tokens are stored securely in cookies.
 
--   todo, in progress, done for tasks
--   add tags to tasks,
--   add standalone tasks (like to do list not related to projects)
--   add tasks inside projects
--   charts for details
+### Projects
+
+-   Create Project - `POST /projects/createProject`
+
+-   Get User's Projects - `GET /projects/getUserProjects`
+
+-   Get Single Project - `GET /projects/getSingleProject`
+
+-   Delete Project - `DELETE /projects/deleteProject`
+
+-   Update Project - `PUT /projects/updateProject`
+
+-   Tasks Under a Project - `GET /projects/getProjectTasks`
+
+-   Create Task Under Project - `POST /projects/createTaskUnderProject`
+
+-   Update Project Members - `GET /projects/updateProjectMembers`
+
+-   Update Task Assignees - `GET /projects/updateTaskAssignees`
+
+### Tasks
+
+-   Create Standalone Task (not under a project) - `POST /tasks/createStandaloneTask`
+
+-   Get User's Tasks - `GET /tasks/getUserTasks`
+
+-   Update Task - `PUT /tasks/updateTask`
+
+-   Delete Task - `DELETE /tasks/deleteTask`
+
+-   Create Comment Under Task - `POST /tasks/createCommentUnderTask`
+
+-   Get Task Comments - `GET /tasks/getTaskComments`
+
+### Comments
+
+-   Update Comment - `PUT /comments/updateComment`
+
+-   Delete Comment - `DELETE /comments/deleteComment`
+
+## Technologies Used
+
+-   Node.js
+
+-   Express.js
+
+-   MongoDB with Mongoose ODM
+
+-   JWT Authentication (Access Token + Refresh Token stored in HTTP-Only Cookies)
+
+-   Express Rate Limit for API protection
+
+-   Bcrypt for password hashing

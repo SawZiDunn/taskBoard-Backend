@@ -28,8 +28,12 @@ authController = {
             await newUser.save();
             return res.status(201).json({
                 success: true,
-                message: "New User registered successfully.",
-                user: { username: newUser.username, email: newUser.email },
+                message: "User registered successfully.",
+                user: {
+                    id: newUser._id,
+                    username: newUser.username,
+                    email: newUser.email,
+                },
             });
         } catch (e) {
             console.log("Registratin Error:\n", e);
@@ -109,6 +113,7 @@ authController = {
                 message: "Login Successful",
                 accessToken,
                 user: {
+                    id: existedUser._id,
                     username: existedUser.username,
                     email: existedUser.email,
                 },
